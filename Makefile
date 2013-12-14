@@ -5,7 +5,7 @@
 # Assure that sorting is case sensitive
 LANG=C
 
-#MOCKS+=samba4repo-6-i386
+MOCKS+=samba4repo-6-i386
 #MOCKS+=samba4repo-5-i386
 #MOCKS+=samba4repo-4-i386
 
@@ -64,14 +64,14 @@ install:: $(MOCKS)
 		rpmdir=$(REPOBASEDIR)/$$yumrelease/$$yumarch; \
 		srpmdir=$(REPOBASEDIR)/$$yumrelease/SRPMS; \
 		echo "Pushing SRPMS to $$srpmdir"; \
-		sudo rsync -av $$repo/*.src.rpm --no-owner --no-group $$repo/*.src.rpm $$srpmdir/. || exit 1; \
-		sudo createrepo -q $$srpmdir/.; \
+		rsync -av $$repo/*.src.rpm --no-owner --no-group $$repo/*.src.rpm $$srpmdir/. || exit 1; \
+		createrepo -q $$srpmdir/.; \
 		echo "Pushing RPMS to $$rpmdir"; \
-		sudo rsync -av $$repo/*.rpm --exclude=*.src.rpm --exclude=*debuginfo*.rpm --no-owner --no-group $$repo/*.rpm $$rpmdir/. || exit 1; \
-		sudo createrepo -q $$rpmdir/.; \
+		rsync -av $$repo/*.rpm --exclude=*.src.rpm --exclude=*debuginfo*.rpm --no-owner --no-group $$repo/*.rpm $$rpmdir/. || exit 1; \
+		createrepo -q $$rpmdir/.; \
 	    done; \
-	    echo "Deleting /var/cache/mock/$$repo/to clear cache"; \
-	    sudo rm -rf /var/cache/mock/$$repo/; \
+	    echo "Touching /etc/mock/$$repo.cfg to clear cache"; \
+	    sudo /bin/touch /etc/mock/$$repo.cfg; \
 	done
 
 clean::
