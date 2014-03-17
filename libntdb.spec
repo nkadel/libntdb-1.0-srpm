@@ -32,6 +32,14 @@ Requires: libntdb = %{version}-%{release}
 %description devel
 Header files needed to develop programs that link against the Ntdb library.
 
+%package -n ntdb-tools
+Group: Development/Libraries
+Summary: Developer tools for the Ntdb library
+Requires: libntdb = %{version}-%{release}
+
+%description -n ntdb-tools
+Tools to manage Ndb files
+
 %prep
 %setup -q -n ntdb-%{version}
 
@@ -77,6 +85,8 @@ rm -rf $RPM_BUILD_ROOT
 %files
 %defattr(-,root,root,-)
 %{_libdir}/libntdb.so.*
+
+%files -n ntdb-tools
 %{_bindir}/ntdb*
 %{_mandir}/man3/*
 %{_mandir}/man8/*
@@ -100,6 +110,7 @@ rm -rf $RPM_BUILD_ROOT
 - Discard doxygen requirements and actions, wbscript cenerates man pages
 - Manually deploy and compress man pages in correct target mandirs
 - Discard pyntdb packaging from libtalloc
+- Add ntdb-tools package
 
 * Sun Nov 24 2013 Nico Kadel-Garcia <nkadel@gmail.com> - 1.0-0.1
 - First libntdb package, based on libtalloc
