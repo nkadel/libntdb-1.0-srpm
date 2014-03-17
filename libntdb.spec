@@ -6,7 +6,7 @@
 
 Name: libntdb
 Version: 1.0
-Release: 0.1%{?dist}
+Release: 0.2%{?dist}
 Group: System Environment/Daemons
 Summary: The ntdb library
 License: LGPLv3+
@@ -18,7 +18,6 @@ BuildRequires: autoconf
 BuildRequires: libxslt
 BuildRequires: docbook-style-xsl
 BuildRequires: python-devel
-BuildRequires: doxygen
 
 # Patches
 
@@ -33,24 +32,6 @@ Requires: libntdb = %{version}-%{release}
 %description devel
 Header files needed to develop programs that link against the Ntdb library.
 
-%package -n pyntdb
-Group: Development/Libraries
-Summary: Developer tools for the Ntdb library
-Requires: libntdb = %{version}-%{release}
-Obsoletes: pyntdb < %{version}-%{release}
-
-%description -n pyntdb
-Pyntdb libraries for creating python bindings using ntdb
-
-%package -n pyntdb-devel
-Group: Development/Libraries
-Summary: Developer tools for the Ntdb library
-Requires: pyntdb = %{version}-%{release}
-Obsoletes: pyntdb-devel < %{version}-%{release}
-
-%description -n pyntdb-devel
-Development libraries for pyntdb
-
 %prep
 %setup -q -n ntdb-%{version}
 
@@ -61,8 +42,7 @@ Development libraries for pyntdb
            --builtin-libraries=replace \
            --disable-silent-rules
 
-make %{?_smp_mflags} V=1
-doxygen doxy.config
+make V=1
 
 %install
 rm -rf $RPM_BUILD_ROOT
@@ -76,8 +56,20 @@ find $RPM_BUILD_ROOT -name "*.so*" -exec chmod -c +x {} \;
 rm -f $RPM_BUILD_ROOT%{_libdir}/libntdb.a
 rm -f $RPM_BUILD_ROOT/usr/share/swig/*/ntdb.i
 
-# Install API docs
-cp -a doc/man/* $RPM_BUILD_ROOT/%{_mandir}
+# Hackery to install ntdb man pages
+# Grab *ALL* man pages first, indiscriminately, so new categories
+# error out
+mkdir -p $RPM_BUILD_ROOT %{_mandir}
+install -m 644 bin/default/man/*.* $RPM_BUILD_ROOT/%{_mandir}/
+
+# Compress and deploy to mandir subdirectories as needed
+mkdir -p $RPM_BUILD_ROOT %{_mandir}/man3
+mv $RPM_BUILD_ROOT/%{_mandir}/*.3 $RPM_BUILD_ROOT/%{_mandir}/man3
+gzip -9 $RPM_BUILD_ROOT/%{_mandir}/man3/*.3
+
+mkdir -p $RPM_BUILD_ROOT %{_mandir}/man3
+mv $RPM_BUILD_ROOT/%{_mandir}/*.8 $RPM_BUILD_ROOT/%{_mandir}/man8
+gzip -9 $RPM_BUILD_ROOT/%{_mandir}/man8/*.8
 
 %clean
 rm -rf $RPM_BUILD_ROOT
@@ -85,25 +77,17 @@ rm -rf $RPM_BUILD_ROOT
 %files
 %defattr(-,root,root,-)
 %{_libdir}/libntdb.so.*
+%{_bindir}/ntdb*
+%{_mandir}/man3/*
+%{_mandir}/man8/*
 
 %files devel
 %defattr(-,root,root,-)
 %{_includedir}/ntdb.h
-%{_libdir}/libntdb.so
+%{_libdir}/*.so
+%{_libdir}/ntdb/*.so
 %{_libdir}/pkgconfig/ntdb.pc
-%{_mandir}/man3/ntdb*.3.gz
-%{_mandir}/man3/libntdb*.3.gz
-
-%files -n pyntdb
-%defattr(-,root,root,-)
-%{_libdir}/libpyntdb-util.so.*
 %{python_sitearch}/ntdb.so
-
-%files -n pyntdb-devel
-%defattr(-,root,root,-)
-%{_includedir}/pyntdb.h
-%{_libdir}/pkgconfig/pyntdb-util.pc
-%{_libdir}/libpyntdb-util.so
 
 %post
 /sbin/ldconfig
@@ -111,9 +95,11 @@ rm -rf $RPM_BUILD_ROOT
 %postun
 /sbin/ldconfig
 
-%post -n pyntdb -p /sbin/ldconfig
-%postun -n pyntdb -p /sbin/ldconfig
-
 %changelog
+* Sun Mar 16 2014 Nico Kadel-Garcia <nkadel@gmail.com> - 1.0-0.2
+- Discard doxygen requirements and actions, wbscript cenerates man pages
+- Manually deploy and compress man pages in correct target mandirs
+- Discard pyntdb packaging from libtalloc
+
 * Sun Nov 24 2013 Nico Kadel-Garcia <nkadel@gmail.com> - 1.0-0.1
 - First libntdb package, based on libtalloc
