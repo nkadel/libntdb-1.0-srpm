@@ -11,7 +11,7 @@ Group: System Environment/Daemons
 Summary: The ntdb library
 License: LGPLv3+
 URL: http://ntdb.samba.org/
-Source: http://samba.org/ftp/ntdb/ntdb-%{version}.tar.gz
+Source: https://www.samba.org/ftp/ntdb/ntdb-%{version}.tar.gz
 BuildRoot: %(mktemp -ud %{_tmppath}/%{name}-%{version}-%{release}-XXXXXX)
 
 BuildRequires: autoconf
